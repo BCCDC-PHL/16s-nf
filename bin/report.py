@@ -5,21 +5,22 @@ import pandas as pd
 #cols = 'qseqid sseqid pident qlen slen mismatch gapopen qstart qend sstart send bitscore'.split(' ')
 result_table_nt = pd.read_csv("output_nt/combined_blast_species_genus_results.csv",index_col=None)
 result_table_silva = pd.read_csv("output_silva/combined_blast_species_genus_results.csv",index_col=None)
-result_table_gg = pd.read_csv("output_gg/combined_blast_species_genus_results.csv",index_col=None)
+#result_table_ncbi16s = pd.read_csv("output_ncbi16s/combined_blast_species_genus_results.csv",index_col=None)
 result_table_rdp = pd.read_csv("output_rdp/combined_blast_species_genus_results.csv",index_col=None)
 
 result_table_nt['database'] = 'nt'
 result_table_silva['database'] = 'silva'
-result_table_gg['database'] = 'greengenes'
+#result_table_ncbi16s['database'] = 'ncbi 16s'
 result_table_rdp['database'] = 'rdp'
 
 #result_table_nt['database'] = result_table_nt['query_seq_id'].apply(lambda x: starts)
 
-result_table = pd.concat([result_table_nt, result_table_silva,result_table_gg,result_table_rdp])
+result_table = pd.concat([result_table_nt, result_table_silva,result_table_rdp])
 
 result_table["species"] = result_table["species"].apply(lambda x: "" if x=="a" else x)
 #result_table.apply(lambda x: '16s NR' if x["query_seq_id"].startswith('NR_') else x["database"])
-result_table = result_table.sort_values(['query_seq_id', 'bitscore'],ascending=False)
+result_table = result_table.sort_values(['query_seq_id','bitscore'],ascending=[True,False])
+
 
 result_table['percent_identity'] = result_table['percent_identity'].apply(lambda x: round(x))
 result_table['percent_coverage'] = result_table['percent_coverage'].apply(lambda x: round(x))

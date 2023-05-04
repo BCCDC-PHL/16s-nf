@@ -39,7 +39,7 @@ process blastn {
     """
     export BLASTDB="${db_dir}"
 
-    echo "query_seq_id,subject_accession,subject_strand,query_length,query_start,query_end,subject_length,subject_start,subject_end,alignment_length,percent_identity,percent_coverage,num_mismatch,num_gaps,e_value,bitscore,subject_taxids,subject_names" > ${sample_id}_blast.csv
+    echo "query_seq_id,subject_accession,subject_strand,query_length,query_start,query_end,subject_length,subject_start,subject_end,alignment_length,percent_identity,percent_coverage,num_mismatch,num_gaps,e_value,bitscore,subject_taxids,subject_names" > ${sample_id}_blast_pre.csv
 
     blastn \
       -db ${db_name} \
@@ -48,15 +48,21 @@ process blastn {
       -qcov_hsp_perc ${params.mincov} \
       -query ${query} \
       -outfmt "6 qseqid saccver sstrand qlen qstart qend slen sstart send length pident qcovhsp mismatch gaps evalue bitscore staxids sscinames" \
-    | tr \$"\\t" "," >> ${sample_id}_blast.csv
+    | tr \$"\\t" "," >> ${sample_id}_blast_pre.csv
 
-    tail -qn+2 ${sample_id}_blast.csv | cut -d',' -f2 | sort -u > seqids
+    tail -qn+2 ${sample_id}_blast_pre.csv | cut -d',' -f2 | sort -u > seqids
     blastdbcmd -db ${db_name} -entry_batch seqids | grep '>' > ${sample_id}_seq_description
+
+    if [ "${db_dir}" == "ncbi16s" ] ; then
+        parse_genbank.py -i ${sample_id}_blast_pre.csv -g ${params.gbfile} -o ${sample_id}_blast.csv
+    else
+        cat ${sample_id}_blast_pre.csv > ${sample_id}_blast.csv
+    fi
 
     tail -qn+2 ${sample_id}_blast.csv | cut -d',' -f17 | sort -u > taxids
     taxonkit lineage -r -n  taxids > ${sample_id}_taxon_results.txt
 
-    if [ "${db_dir}" == "2022-11-16_nt" ] || [ "${db_dir}" == "silva" ]; then
+    if [ "${db_dir}" == "2022-11-16_nt" ] || [ "${db_dir}" == "silva" ] || [ "${db_dir}" == "ncbi16s" ] ; then
         bind_taxonkit.py -f ${sample_id}_taxon_results.txt -b ${sample_id}_blast.csv -o ${sample_id}_blast_species_genus_results.csv
     fi
 
