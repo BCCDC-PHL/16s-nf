@@ -1,4 +1,4 @@
-# fasta-blasta
+# 16s-nf
 
 A simple pipeline for running [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi) on [fasta](https://en.wikipedia.org/wiki/FASTA_format) files.
 
@@ -7,7 +7,7 @@ If multi-fasta file(s) are supplied, each sequence will be processed independent
 ## Usage
 
 ```
-nextflow run dfornika/fasta-blasta \
+nextflow run BCCDC-PHL/16s-nf \
   --db_dir </path/to/blast/database_dir> \
   --db_name <blast_db_name> \
   --fasta_input </path/to/fasta_dir> \
@@ -18,7 +18,7 @@ By default, minimum identity and coverage thresholds of 95% will be applied to t
 Alternate thresholds can be applied using the `--minid` and `--mincov` flags.
 
 ```
-nextflow run dfornika/fasta-blasta \
+nextflow run BCCDC-PHL/16s-nf \
   --db_dir </path/to/blast/database_dir> \
   --db_name <blast_db_name> \
   --fasta_input </path/to/fasta_dir> \
