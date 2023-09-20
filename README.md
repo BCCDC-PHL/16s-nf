@@ -1,8 +1,6 @@
 # 16s-nf
 
-A simple pipeline for running [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi) on [fasta](https://en.wikipedia.org/wiki/FASTA_format) files.
-
-If multi-fasta file(s) are supplied, each sequence will be processed independently.
+Prepare a report for taxonomic assignment based on [16S rRNA](https://en.wikipedia.org/wiki/16S_ribosomal_RNA) sequences, using [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi).
 
 ## Usage
 
