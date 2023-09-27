@@ -14,7 +14,11 @@ workflow {
     ch_fasta = Channel.fromPath(params.fasta_search_path)
   }
 
-  ch_db = Channel.fromPath(params.db_dir).combine(Channel.of(params.db_name))
+  if (params.databases != 'NO_FILE') {
+    ch_db = Channel.fromPath(params.databases).splitCsv(header: true).map{ it -> [it['ID'], it['DBNAME'], it['PATH']] }
+  } else {
+    ch_db = Channel.of()
+  }
 
   ch_seqs = ch_fasta.splitFasta(file: true)
 
