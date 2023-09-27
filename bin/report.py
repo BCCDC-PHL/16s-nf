@@ -2,49 +2,26 @@
 
 import pandas as pd
 
-#cols = 'qseqid sseqid pident qlen slen mismatch gapopen qstart qend sstart send bitscore'.split(' ')
 result_table_nt = pd.read_csv("output/output_ncbi16s/combined_blast_species_genus_results.csv",index_col=None)
 result_table_silva = pd.read_csv("output/output_silva/combined_blast_species_genus_results.csv",index_col=None)
-#result_table_ncbi16s = pd.read_csv("output_ncbi16s/combined_blast_species_genus_results.csv",index_col=None)
 result_table_rdp = pd.read_csv("output/output_rdp/combined_blast_species_genus_results.csv",index_col=None)
 
 result_table_nt['database'] = 'ncbi16s'
 result_table_silva['database'] = 'silva'
-#result_table_ncbi16s['database'] = 'ncbi 16s'
 result_table_rdp['database'] = 'rdp'
-
-#result_table_nt['database'] = result_table_nt['query_seq_id'].apply(lambda x: starts)
 
 result_table = pd.concat([result_table_nt, result_table_silva,result_table_rdp])
 
 result_table["species"] = result_table["species"].apply(lambda x: "" if x=="a" else x)
-#result_table.apply(lambda x: '16s NR' if x["query_seq_id"].startswith('NR_') else x["database"])
 result_table = result_table.sort_values(['query_seq_id','bitscore'],ascending=[True,False])
 
 
 result_table['percent_identity'] = result_table['percent_identity'].apply(lambda x: round(x,3))
 result_table['percent_coverage'] = result_table['percent_coverage'].apply(lambda x: round(x,3))
-#with open('result.txt') as f:
-#    lines = f.readlines()
 
-#id =  [x.split(' ')[0].replace('>','') for x in lines]
-
-#des = [' '.join(x.split(' ')[1::]) for x in lines]
-
-#res = dict(zip(id, des))
-
-#blast_results['sseqid'] = blast_results['sseqid'].apply(lambda x: x.split('|')[-2])
-#blast_results['description'] = blast_results['sseqid'].apply(lambda x: res[x])
-#blast_results['coverage'] = blast_results['qlen'] * 100 / blast_results['slen']
-
-#best_bitscores = blast_results[['qseqid','sseqid', 'bitscore']].groupby(['qseqid','sseqid']).max().reset_index()
-#blast_results = pd.merge(blast_results, best_bitscores, on=['qseqid','sseqid', 'bitscore'])
-
-#result_table = blast_results[["qseqid","sseqid","description","bitscore","coverage","pident"]].drop_duplicates()
 
 #write out report in html
 result_table = result_table.drop_duplicates(subset=['query_seq_id','subject_accession','species','genus','percent_identity','percent_coverage','bitscore'], keep = 'first')
-#result_table = result_table[~(((result_table['species'] == 'uncultured bacterium') | (result_table['species'] == 'uncultured organism') | (result_table['species'] == 'uncultured microorganism ')) & (result_table['genus'] == 'environmental samples'))]
 result_table = result_table.fillna('')
 fil = result_table['species'].str.contains('uncultured')
 result_table = result_table[~fil]
@@ -52,7 +29,6 @@ result_table = result_table[~fil]
 
 qseq = result_table['query_seq_id'].drop_duplicates()
 
-#qseq.to_csv("report_table.csv")
 
 HEAD = '''
 <!DOCTYPE html>
@@ -124,7 +100,6 @@ TABLE = '''
                     <th>species</th>
                     <th>genus</th>
                     <th>query_length</th>
-                    <th>subject_length</th>
                     <th>alignment_length</th>
                     <th>num_mismatches</th>
                     <th>bitscore</th>
@@ -140,8 +115,8 @@ TABLE = '''
             </tbody>
             <tbody>
                 <tr>
-                    <td id="{}_show" align="center" colspan="6">Displaying 20/500 matches. <a href="#{}_extra" onclick="toggle('{}_extra'); toggle('{}_show'); toggle('{}_hide');">Show the remaining results.</a></td>
-                    <td id="{}_hide" align="center" colspan="6" style="display:none"><a href="#{}" onclick="toggle('{}_extra'); toggle('{}_show'); toggle('{}_hide');">Hide the last 480 results.</a></td>
+                    <td id="{}_show" align="center" colspan="6">Displaying 20/300 matches. <a href="#{}_extra" onclick="toggle('{}_extra'); toggle('{}_show'); toggle('{}_hide');">Show the remaining results.</a></td>
+                    <td id="{}_hide" align="center" colspan="6" style="display:none"><a href="#{}" onclick="toggle('{}_extra'); toggle('{}_show'); toggle('{}_hide');">Hide the last 280 results.</a></td>
                 </tr>
             </tbody>
         </table>
@@ -153,7 +128,7 @@ FOOT = '''
 </html>
 '''
 
-ROW = ' ' * 20 + "<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%.3f</td><td>%.3f</td><td>%s</td></tr>"
+ROW = ' ' * 20 + "<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%.3f</td><td>%.3f</td><td>%s</td></tr>"
 
 Func = open("output/report.html","w")
 Func.write(HEAD)
@@ -167,7 +142,7 @@ for q in qseq:
     if len(ptable) < 20:
         for i in range(1,len(ptable)):
           
-            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20],ptable.iloc[i,4],ptable.iloc[i,7],ptable.iloc[i,10],ptable.iloc[i,13], ptable.iloc[i,16], round(ptable.iloc[i,12],3), round(ptable.iloc[i,11],3),ptable.iloc[i,21])
+            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20],ptable.iloc[i,4],ptable.iloc[i,10],ptable.iloc[i,13], ptable.iloc[i,16], round(ptable.iloc[i,12],3), round(ptable.iloc[i,11],3),ptable.iloc[i,21])
             row_list.append(instr)
         strTable = TABLE.format(q,'\n'.join(row_list),q,q,q,q,q,q,q,q,q,q,q,q,q)
         Func.write(strTable)
@@ -175,12 +150,12 @@ for q in qseq:
 
         for i in range(1,20):
             #print(ptable.iloc[i,12],3)
-            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20],ptable.iloc[i,4],ptable.iloc[i,7],ptable.iloc[i,10],ptable.iloc[i,13], ptable.iloc[i,16], round(ptable.iloc[i,12],3), round(ptable.iloc[i,11],3),ptable.iloc[i,21])
+            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20],ptable.iloc[i,4],ptable.iloc[i,10],ptable.iloc[i,13], ptable.iloc[i,16], round(ptable.iloc[i,12],3), round(ptable.iloc[i,11],3),ptable.iloc[i,21])
             row_list.append(instr)
 
         hiden_row_list = []
-        for i in range(21,min(len(ptable),500)):
-            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20],ptable.iloc[i,4],ptable.iloc[i,7],ptable.iloc[i,10],ptable.iloc[i,13], ptable.iloc[i,16], round(ptable.iloc[i,12],3), round(ptable.iloc[i,11],3),ptable.iloc[i,21])
+        for i in range(21,min(len(ptable),300)):
+            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20],ptable.iloc[i,4],ptable.iloc[i,10],ptable.iloc[i,13], ptable.iloc[i,16], round(ptable.iloc[i,12],3), round(ptable.iloc[i,11],3),ptable.iloc[i,21])
             hiden_row_list.append(instr)
         strTable = TABLE.format(q,'\n'.join(row_list),q,'\n'.join(hiden_row_list),q,q,q,q,q,q,q,q,q,q,q)
         Func.write(strTable)
