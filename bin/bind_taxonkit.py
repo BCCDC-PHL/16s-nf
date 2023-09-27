@@ -29,8 +29,10 @@ def main(args):
     
 
     merged = pd.merge(blast_results,taxon_results[['subject_taxids','species','genus']],on='subject_taxids', how='left')
+    fil = merged['species'].str.contains('uncultured')
+    filtered_merged = merged[~fil]
 
-    merged.to_csv(args.outfile)
+    filtered_merged.to_csv(args.outfile)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

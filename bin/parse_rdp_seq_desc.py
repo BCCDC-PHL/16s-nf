@@ -6,7 +6,7 @@ import pandas as pd
 def main(args):
     blast_results = pd.read_csv(args.blastresult,sep = ',')
     #blast_results = pd.read_csv('F1910235_blast.csv',sep = ',')
-
+    #print(blast_results)
     dict = {}
     with open(args.decriptionfile) as f:
         for line in f:
@@ -19,8 +19,20 @@ def main(args):
 
 
     df = pd.DataFrame([{"subject_accession": key, "species": species, "genus": genus} for key, (species,genus) in dict.items()])
+    
+    fil = df['species'].str.contains('uncultured')
+    filtered_df = df[~fil]
 
-    merged = pd.merge(blast_results,df,on='subject_accession', how='left')
+    
+    merged = pd.merge(blast_results,filtered_df,on='subject_accession', how='left')
+
+    
+
+    
+    merged = merged.dropna(subset=['species','genus'])
+    print(merged)
+    #filtered_merged = filtered_merged[~(filtered_merged['species'] == '')]
+    
 
     merged.to_csv(args.outfile)
 

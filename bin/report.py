@@ -3,12 +3,12 @@
 import pandas as pd
 
 #cols = 'qseqid sseqid pident qlen slen mismatch gapopen qstart qend sstart send bitscore'.split(' ')
-result_table_nt = pd.read_csv("output_nt/combined_blast_species_genus_results.csv",index_col=None)
-result_table_silva = pd.read_csv("output_silva/combined_blast_species_genus_results.csv",index_col=None)
+result_table_nt = pd.read_csv("output/output_ncbi16s/combined_blast_species_genus_results.csv",index_col=None)
+result_table_silva = pd.read_csv("output/output_silva/combined_blast_species_genus_results.csv",index_col=None)
 #result_table_ncbi16s = pd.read_csv("output_ncbi16s/combined_blast_species_genus_results.csv",index_col=None)
-result_table_rdp = pd.read_csv("output_rdp/combined_blast_species_genus_results.csv",index_col=None)
+result_table_rdp = pd.read_csv("output/output_rdp/combined_blast_species_genus_results.csv",index_col=None)
 
-result_table_nt['database'] = 'nt'
+result_table_nt['database'] = 'ncbi16s'
 result_table_silva['database'] = 'silva'
 #result_table_ncbi16s['database'] = 'ncbi 16s'
 result_table_rdp['database'] = 'rdp'
@@ -22,8 +22,8 @@ result_table["species"] = result_table["species"].apply(lambda x: "" if x=="a" e
 result_table = result_table.sort_values(['query_seq_id','bitscore'],ascending=[True,False])
 
 
-result_table['percent_identity'] = result_table['percent_identity'].apply(lambda x: round(x))
-result_table['percent_coverage'] = result_table['percent_coverage'].apply(lambda x: round(x))
+result_table['percent_identity'] = result_table['percent_identity'].apply(lambda x: round(x,3))
+result_table['percent_coverage'] = result_table['percent_coverage'].apply(lambda x: round(x,3))
 #with open('result.txt') as f:
 #    lines = f.readlines()
 
@@ -44,8 +44,11 @@ result_table['percent_coverage'] = result_table['percent_coverage'].apply(lambda
 
 #write out report in html
 result_table = result_table.drop_duplicates(subset=['query_seq_id','subject_accession','species','genus','percent_identity','percent_coverage','bitscore'], keep = 'first')
-result_table = result_table[~(((result_table['species'] == 'uncultured bacterium') | (result_table['species'] == 'uncultured organism') | (result_table['species'] == 'uncultured microorganism ')) & (result_table['genus'] == 'environmental samples'))]
+#result_table = result_table[~(((result_table['species'] == 'uncultured bacterium') | (result_table['species'] == 'uncultured organism') | (result_table['species'] == 'uncultured microorganism ')) & (result_table['genus'] == 'environmental samples'))]
 result_table = result_table.fillna('')
+fil = result_table['species'].str.contains('uncultured')
+result_table = result_table[~fil]
+
 
 qseq = result_table['query_seq_id'].drop_duplicates()
 
@@ -120,6 +123,10 @@ TABLE = '''
                     <th>subject_accession</th>
                     <th>species</th>
                     <th>genus</th>
+                    <th>query_length</th>
+                    <th>subject_length</th>
+                    <th>alignment_length</th>
+                    <th>num_mismatches</th>
                     <th>bitscore</th>
                     <th>percent_coverage</th>
                     <th>percent_identity</th>
@@ -146,31 +153,36 @@ FOOT = '''
 </html>
 '''
 
-ROW = ' ' * 20 + "<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%s</td></tr>"
+ROW = ' ' * 20 + "<tr><td>%s</td><td>%s</td><td>%s</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%d</td><td>%.3f</td><td>%.3f</td><td>%s</td></tr>"
 
-Func = open("report.html","w")
+Func = open("output/report.html","w")
 Func.write(HEAD)
 
 for q in qseq:
     ptable = result_table[result_table['query_seq_id'] == q]
     
     print(q)
+    
     row_list = []
     if len(ptable) < 20:
         for i in range(1,len(ptable)):
-            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20], ptable.iloc[i,16], round(ptable.iloc[i,12]), round(ptable.iloc[i,11]),ptable.iloc[i,21])
+          
+            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20],ptable.iloc[i,4],ptable.iloc[i,7],ptable.iloc[i,10],ptable.iloc[i,13], ptable.iloc[i,16], round(ptable.iloc[i,12],3), round(ptable.iloc[i,11],3),ptable.iloc[i,21])
             row_list.append(instr)
-        strTable = TABLE.format(q,'\n'.join(row_list),q,q,q,q,q,q,q,q,q,q,q,q)
+        strTable = TABLE.format(q,'\n'.join(row_list),q,q,q,q,q,q,q,q,q,q,q,q,q)
+        Func.write(strTable)
     else:
 
         for i in range(1,20):
-            instr = ROW % ( ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20], ptable.iloc[i,16], round(ptable.iloc[i,12]), round(ptable.iloc[i,11]),ptable.iloc[i,21])
+            #print(ptable.iloc[i,12],3)
+            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20],ptable.iloc[i,4],ptable.iloc[i,7],ptable.iloc[i,10],ptable.iloc[i,13], ptable.iloc[i,16], round(ptable.iloc[i,12],3), round(ptable.iloc[i,11],3),ptable.iloc[i,21])
             row_list.append(instr)
+
         hiden_row_list = []
         for i in range(21,min(len(ptable),500)):
-            instr = ROW % ( ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20], ptable.iloc[i,16], round(ptable.iloc[i,12]), round(ptable.iloc[i,11]),ptable.iloc[i,21])
+            instr = ROW % (ptable.iloc[i,2], ptable.iloc[i,19], ptable.iloc[i,20],ptable.iloc[i,4],ptable.iloc[i,7],ptable.iloc[i,10],ptable.iloc[i,13], ptable.iloc[i,16], round(ptable.iloc[i,12],3), round(ptable.iloc[i,11],3),ptable.iloc[i,21])
             hiden_row_list.append(instr)
-        strTable = TABLE.format(q,'\n'.join(row_list),q,'\n'.join(hiden_row_list),q,q,q,q,q,q,q,q,q,q)
+        strTable = TABLE.format(q,'\n'.join(row_list),q,'\n'.join(hiden_row_list),q,q,q,q,q,q,q,q,q,q,q)
         Func.write(strTable)
 
 Func.write(FOOT)

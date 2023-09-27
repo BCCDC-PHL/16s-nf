@@ -20,7 +20,7 @@ process seq_qc {
 }
 
 process blastn {
-    //errorStrategy 'ignore'
+    errorStrategy 'ignore'
     
 
     publishDir "${params.outdir}/${sample_id}", mode: 'copy', pattern: "${sample_id}*"
@@ -39,7 +39,7 @@ process blastn {
     """
     export BLASTDB="${db_dir}"
 
-    echo "query_seq_id,subject_accession,subject_strand,query_length,query_start,query_end,subject_length,subject_start,subject_end,alignment_length,percent_identity,percent_coverage,num_mismatch,num_gaps,e_value,bitscore,subject_taxids,subject_names" > ${sample_id}_blast_pre.csv
+    echo "query_seq_id,subject_accession,subject_strand,query_length,query_start,query_end,subject_length,subject_start,subject_end,alignment_length,percent_identity,percent_coverage,num_mismatch,num_gaps,e_value,bitscore,subject_taxids,subject_names" > ${sample_id}_blast.csv
 
     blastn \
       -db ${db_name} \
@@ -48,30 +48,22 @@ process blastn {
       -qcov_hsp_perc ${params.mincov} \
       -query ${query} \
       -outfmt "6 qseqid saccver sstrand qlen qstart qend slen sstart send length pident qcovhsp mismatch gaps evalue bitscore staxids sscinames" \
-    | tr \$"\\t" "," >> ${sample_id}_blast_pre.csv
+    | tr \$"\\t" "," >> ${sample_id}_blast.csv
 
-    tail -qn+2 ${sample_id}_blast_pre.csv | cut -d',' -f2 | sort -u > seqids
+    tail -qn+2 ${sample_id}_blast.csv | cut -d',' -f2 | sort -u > seqids
     blastdbcmd -db ${db_name} -entry_batch seqids | grep '>' > ${sample_id}_seq_description
 
-    if [ "${db_dir}" == "ncbi16s" ] ; then
-        parse_genbank.py -i ${sample_id}_blast_pre.csv -g ${params.gbfile} -o ${sample_id}_blast.csv
-    else
-        cat ${sample_id}_blast_pre.csv > ${sample_id}_blast.csv
-    fi
 
-    tail -qn+2 ${sample_id}_blast.csv | cut -d',' -f17 | sort -u > taxids
-    taxonkit lineage -r -n  taxids > ${sample_id}_taxon_results.txt
+
 
     if [ "${db_dir}" == "2022-11-16_nt" ] || [ "${db_dir}" == "silva" ] || [ "${db_dir}" == "ncbi16s" ] ; then
+        tail -qn+2 ${sample_id}_blast.csv | cut -d',' -f17 | sort -u > taxids
+        taxonkit lineage -r -n  taxids > ${sample_id}_taxon_results.txt
         bind_taxonkit.py -f ${sample_id}_taxon_results.txt -b ${sample_id}_blast.csv -o ${sample_id}_blast_species_genus_results.csv
     fi
 
     if [ "${db_dir}" == "RDP" ]; then
         parse_rdp_seq_desc.py -f ${sample_id}_seq_description -b ${sample_id}_blast.csv -o ${sample_id}_blast_species_genus_results.csv
-    fi
-
-    if [ "${db_dir}" == "greengenes" ]; then
-        parse_gg_seq_desc.py -f ${params.gg_tax} -b ${sample_id}_blast.csv -o ${sample_id}_blast_species_genus_results.csv
     fi
 
     """
