@@ -56,7 +56,7 @@ process blastn {
 
     if [ "${db_id}" == "ncbi" ] || [ "${db_id}" == "silva" ]; then
         tail -qn+2 ${sample_id}_${db_id}_blast.csv | cut -d',' -f17 | sort -u > taxids
-        taxonkit lineage -r -n  taxids > ${sample_id}_${db_id}_taxon_results.txt
+        taxonkit lineage -R -n -t taxids > ${sample_id}_${db_id}_taxon_results.txt
         bind_taxonkit.py -f ${sample_id}_${db_id}_taxon_results.txt -b ${sample_id}_${db_id}_blast.csv > ${sample_id}_${db_id}_blast_species_genus_results.csv
     fi
     """

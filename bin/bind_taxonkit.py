@@ -17,29 +17,29 @@ def parse_taxonkit_lineage(taxonkit_path):
     """
     taxonkit_lineage_by_taxid = {}
     with open(taxonkit_path, 'r') as f:
-        taxonkit_lineage_record = {}
         for line in f:
+            taxonkit_lineage_record = {}
+
             line_split = line.strip().split('\t')
-            taxid = line_split[0]
+            query_taxid = line_split[0]
             lineage = line_split[1]
             lineage_split = lineage.split(';')
-            name = line_split[2]
-            rank = line_split[3]
-            taxonkit_lineage_record['taxid'] = taxid
-            taxonkit_lineage_record['lineage_str'] = lineage
-            taxonkit_lineage_record['lineage'] = lineage_split
-            taxonkit_lineage_record['name'] = name
-            taxonkit_lineage_record['rank'] = rank
-            taxonkit_lineage_by_taxid[taxid] = taxonkit_lineage_record
-            taxonkit_lineage_record = {}
-            if len(lineage) >= 8:
-                taxonkit_lineage_by_taxid[taxid]['species'] = lineage_split[7]
-            else:
-                taxonkit_lineage_by_taxid[taxid]['species'] = None
-            if len(lineage) >= 7:
-                taxonkit_lineage_by_taxid[taxid]['genus'] = lineage_split[6]
-            else:
-                taxonkit_lineage_by_taxid[taxid]['genus'] = None
+            taxids = line_split[2]
+            taxids_split = taxids.split(';')
+            name = line_split[3]
+            ranks = line_split[4]
+            ranks_split = ranks.split(';')
+            
+            taxonkit_lineage_record['query_taxid'] = query_taxid
+            for idx, rank in enumerate(ranks_split):
+                if rank == 'species':
+                    taxonkit_lineage_record['species_taxid'] = taxids_split[idx]
+                    taxonkit_lineage_record['species_name'] = lineage_split[idx]
+                elif rank == 'genus':
+                    taxonkit_lineage_record['genus_taxid'] = taxids_split[idx]
+                    taxonkit_lineage_record['genus_name'] = lineage_split[idx]
+
+            taxonkit_lineage_by_taxid[query_taxid] = taxonkit_lineage_record
             
     return taxonkit_lineage_by_taxid
 
@@ -68,14 +68,14 @@ def main(args):
     blast_results = parse_blast_results(args.blastresult)
 
     for blast_result in blast_results:
-        taxid = blast_result['subject_taxids']
-        if taxid in taxonkit_lineage_by_taxid:
-            blast_result['species'] = taxonkit_lineage_by_taxid[blast_result['subject_taxids']]['species']
-            blast_result['genus'] = taxonkit_lineage_by_taxid[blast_result['subject_taxids']]['genus']
+        subject_taxid = blast_result['subject_taxids']
+        if subject_taxid in taxonkit_lineage_by_taxid:
+            blast_result['species'] = taxonkit_lineage_by_taxid[subject_taxid].get('species_name', None)
+            blast_result['genus'] = taxonkit_lineage_by_taxid[subject_taxid].get('genus_name', None)
         else:
             blast_result['species'] = None
             blast_result['genus'] = None
-
+    
     output_fieldnames = [
         'query_seq_id',
         'subject_accession',
