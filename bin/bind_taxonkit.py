@@ -53,7 +53,7 @@ def parse_blast_results(blast_results_path):
     """
     header_fieldnames = []
     blast_results = []
-    with open(blast_report_path, 'r') as f:
+    with open(blast_results_path, 'r') as f:
         header_line = f.readline().strip()
         header_fieldnames = header_line.split(',')
 

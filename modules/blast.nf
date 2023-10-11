@@ -32,7 +32,7 @@ process blastn {
     output:
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast.csv"),       emit: blast_report, optional:true
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_seq_description"), emit: seq_description, optional:true
-    tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_lineage.tsv"),     emit: lineage, optional:true
+    tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_lineages.tsv"),    emit: lineage, optional:true
     
     script:
     sample_id = query.getName().split('\\.')[0]
