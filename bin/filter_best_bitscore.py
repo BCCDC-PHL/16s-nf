@@ -39,10 +39,16 @@ def main(args):
     best_bitscore = determine_best_bitscore(blast_report)
 
     filtered_blast_report = list(filter(lambda x: x['bitscore'] == best_bitscore, blast_report))
+    seen_species = set()
+    filtered_one_match_per_species_blast_report = []
+    for blast_record in filtered_blast_report:
+        if blast_record['species'] not in seen_species:
+            seen_species.add(blast_record['species'])
+            filtered_one_match_per_species_blast_report.append(blast_record)
 
     writer = csv.DictWriter(sys.stdout, fieldnames=output_fieldnames, dialect='unix', quoting=csv.QUOTE_MINIMAL)
     writer.writeheader()
-    for row in filtered_blast_report:
+    for row in filtered_one_match_per_species_blast_report:
         writer.writerow(row)
 
 
