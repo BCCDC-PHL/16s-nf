@@ -25,6 +25,26 @@ silva,SSURef_NR99_tax_silva_trunc,/path/to/silva/2020-08-24_138.1_SSURef_NR99_ta
 ...etc
 ```
 
+The pipeline also assumes that there is a `metadata.json` file alongside the database files
+
+```
+/path/to/ncbi/2023-09-19_1.1_16S_ribosomal_RNA/metadata.json
+/path/to/silva/2020-08-24_138.1_SSURef_NR99_tax_silva_trunc/metadata.json
+```
+
+The contents of the metadata file may vary by database, but we assume that:
+
+- The file contains a single top-level object (not an array or atomic value).
+- The top-level object includes these fields:
+
+```
+version
+date
+```
+
+The values associated with those fields will be incorporated into the blast results. All other fields in
+the `metadata.json` file are ignored.
+
 ```
 nextflow run BCCDC-PHL/16s-nf \
   --databases </path/to/blast/databases.csv> \
@@ -43,6 +63,17 @@ nextflow run BCCDC-PHL/16s-nf \
   --mincov 97.5 \
   --outdir </path/to/output_dir>
 ```
+
+Collecting database metadata from the `metadata.json` file can be skipped using the `--no_db_metadata` flag.
+
+```
+nextflow run BCCDC-PHL/16s-nf \
+  --databases </path/to/blast/databases.csv> \
+  --no_db_metadata \
+  --fasta_input </path/to/fasta_dir> \
+  --outdir </path/to/output_dir>
+```
+
 
 ## Outputs
 

@@ -17,19 +17,18 @@ def parse_taxonkit_lineage(taxonkit_path):
     """
     taxonkit_lineage_by_taxid = {}
     with open(taxonkit_path, 'r') as f:
-        for line in f:
+        reader = csv.DictReader(f, delimiter='\t')
+        for row in reader:
             taxonkit_lineage_record = {}
-
-            line_split = line.strip().split('\t')
-            query_taxid = line_split[0]
-            lineage = line_split[1]
+            query_taxid = row['query_taxid']
+            lineage = row['lineage']
             lineage_split = lineage.split(';')
-            taxids = line_split[2]
+            taxids = row['lineage_taxids']
             taxids_split = taxids.split(';')
-            name = line_split[3]
-            ranks = line_split[4]
+            name = row['query_taxon_name']
+            ranks = row['lineage_ranks']
             ranks_split = ranks.split(';')
-            
+
             taxonkit_lineage_record['query_taxid'] = query_taxid
             for idx, rank in enumerate(ranks_split):
                 if rank == 'species':
