@@ -109,8 +109,8 @@ e_value
 bitscore
 subject_taxids
 subject_names
-species
 genus
+species
 database_name
 database_version
 database_date

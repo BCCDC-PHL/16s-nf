@@ -81,8 +81,8 @@ def main(args):
             blast_result['genus'] = None
     
     output_fieldnames += [
-        'species',
         'genus',
+        'species',
     ]
     writer = csv.DictWriter(sys.stdout, fieldnames=output_fieldnames, delimiter=',', lineterminator='\n', quoting=csv.QUOTE_MINIMAL, extrasaction='ignore')
     writer.writeheader()
