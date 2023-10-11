@@ -7,19 +7,23 @@ process seq_qc {
     publishDir "${params.outdir}/${sample_id}", mode: 'copy', pattern: "${sample_id}_seq_qc.csv"
 
     input:
-    path(seq)
+    val(seq)
 
     output:
     tuple val(sample_id), path("${sample_id}_seq_qc.csv"), emit: seq_qc_csv
 
     script:
-    sample_id = seq.getName().split('\\.')[0]
+    sample_id = seq.id
     """
-    seq_qc.py -i ${seq} > ${sample_id}_seq_qc.csv
+    echo ">${sample_id}" > ${sample_id}.fa
+    echo "${seq.seqString}" >> ${sample_id}.fa
+
+    seq_qc.py -i ${sample_id}.fa > ${sample_id}_seq_qc.csv
     """
 }
 
 process blastn {
+
     errorStrategy 'ignore'
 
     tag { sample_id + ' / ' + db_id }
@@ -27,7 +31,7 @@ process blastn {
     publishDir "${params.outdir}/${sample_id}", mode: 'copy', pattern: "${sample_id}_${db_id}*"
 
     input:
-    tuple path(query), val(db_id), val(db_name), path(db_dir)
+    tuple val(seq), val(db_id), val(db_name), path(db_dir)
 
     output:
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast.csv"),       emit: blast_report, optional:true
@@ -35,8 +39,11 @@ process blastn {
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_lineages.tsv"),    emit: lineage, optional:true
     
     script:
-    sample_id = query.getName().split('\\.')[0]
+    sample_id = seq.id
     """
+    echo ">${sample_id}" > ${sample_id}.fa
+    echo "${seq.seqString}" >> ${sample_id}.fa
+
     export BLASTDB="${db_dir}"
 
     echo "query_seq_id,subject_accession,subject_strand,query_length,query_start,query_end,subject_length,subject_start,subject_end,alignment_length,percent_identity,percent_coverage,num_mismatch,num_gaps,e_value,bitscore,subject_taxids,subject_names" > ${sample_id}_${db_id}_blast.csv
@@ -46,7 +53,7 @@ process blastn {
       -num_threads ${task.cpus} \
       -perc_identity ${params.minid} \
       -qcov_hsp_perc ${params.mincov} \
-      -query ${query} \
+      -query ${sample_id}.fa \
       -outfmt "6 qseqid saccver sstrand qlen qstart qend slen sstart send length pident qcovhsp mismatch gaps evalue bitscore staxids sscinames" \
     | tr \$"\\t" "," >> ${sample_id}_${db_id}_blast.csv
 

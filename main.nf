@@ -22,7 +22,7 @@ workflow {
     ch_db = Channel.of()
   }
 
-  ch_seqs = ch_fasta.splitFasta(file: true)
+    ch_seqs = ch_fasta.splitFasta(record: [id: true, seqString: true])
 
   main:
     seq_qc(ch_seqs)
