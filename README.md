@@ -117,6 +117,9 @@ database_date
 
 ...though if the `--no_db_metadata` flag is used when running the pipeline, the last three fields will be omitted.
 
+The `_blast_best_bitscore.csv` file will only include one entry per species if there are multiple matches from the same
+species with equally-good bitscores.
+
 The `seq_qc.csv` file has the following headers:
 
 ```

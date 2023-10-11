@@ -8,6 +8,7 @@ import sys
 
 
 def parse_blast_report(blast_report_path):
+    header_fieldnames = []
     with open(blast_report_path, 'r') as f:
         header_line = f.readline().strip()
         header_fieldnames = header_line.split(',')

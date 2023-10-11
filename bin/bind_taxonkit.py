@@ -51,20 +51,25 @@ def parse_blast_results(blast_results_path):
     :type blast_results_path: str
     
     """
+    header_fieldnames = []
     blast_results = []
+    with open(blast_report_path, 'r') as f:
+        header_line = f.readline().strip()
+        header_fieldnames = header_line.split(',')
+
     with open(blast_results_path, 'r') as f:
         reader = csv.DictReader(f)
         for row in reader:
             blast_results.append(row)
 
-    return blast_results
+    return header_fieldnames, blast_results
 
 
 def main(args):
     
     taxonkit_lineage_by_taxid = parse_taxonkit_lineage(args.taxonresult)
 
-    blast_results = parse_blast_results(args.blastresult)
+    output_fieldnames, blast_results = parse_blast_results(args.blastresult)
 
     for blast_result in blast_results:
         subject_taxid = blast_result['subject_taxids']
@@ -75,25 +80,7 @@ def main(args):
             blast_result['species'] = None
             blast_result['genus'] = None
     
-    output_fieldnames = [
-        'query_seq_id',
-        'subject_accession',
-        'subject_strand',
-        'query_length',
-        'query_start',
-        'query_end',
-        'subject_length',
-        'subject_start',
-        'subject_end',
-        'alignment_length',
-        'percent_identity',
-        'percent_coverage',
-        'num_mismatch',
-        'num_gaps',
-        'e_value',
-        'bitscore',
-        'subject_taxids',
-        'subject_names',
+    output_fieldnames += [
         'species',
         'genus',
     ]
