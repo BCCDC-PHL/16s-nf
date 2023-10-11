@@ -82,12 +82,12 @@ the fasta header. That directory will contain:
 
 ```
 <seq_id>_<db_id>_blast.csv
-<seq_id>_<db_id>_blast_species_genus_results.csv
 <seq_id>_<db_id>_blast_best_bitscore.csv
+<seq_id>_<db_id>_blast_filtered.csv
 <seq_id>_<db_id>_seq_qc.csv
 ```
 
-The `blast.csv` and `blast_best_bitscore.csv` files have the following headers:
+The `_blast.csv`, `_blast_filtered.csv` and `blast_best_bitscore.csv` files have the following headers:
 
 ```
 query_seq_id
@@ -108,14 +108,14 @@ e_value
 bitscore
 subject_taxids
 subject_names
-```
-
-The `_blast_species_genus_results.csv` file adds the following fields:
-
-```
 species
 genus
+database_name
+database_version
+database_date
 ```
+
+...though if the `--no_db_metadata` flag is used when running the pipeline, the last three fields will be omitted.
 
 The `seq_qc.csv` file has the following headers:
 
@@ -124,3 +124,12 @@ seq_length
 num_ambiguous_bases
 num_n_bases
 ```
+
+There will also be collected ouputs in the top-level of the `--outdir` directory, named:
+
+```
+collected_blast.csv
+collected_blast_best_bitscore.csv
+```
+
+...which will include results from all sequences.

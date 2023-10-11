@@ -37,5 +37,5 @@ workflow {
 
     ch_blast_best_bitscore = filter_best_bitscore(ch_blast)
 
-    ch_blast_best_bitscore.collectFile(it -> it[1], name: "collected_top_results.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
+    ch_blast_best_bitscore.collectFile(it -> it[1], name: "collected_blast_best_bitscore.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
 }
