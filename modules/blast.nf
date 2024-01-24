@@ -34,7 +34,7 @@ process blastn {
     tuple val(seq), val(db_id), val(db_name), path(db_dir)
 
     output:
-    tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast.csv"),       emit: blast_report
+    tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast.csv"),       emit: blast_report, optional:true
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_seq_description"), emit: seq_description, optional:true
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_lineages.tsv"),    emit: lineage, optional:true
     
@@ -109,25 +109,5 @@ process filter_best_bitscore {
     script:
     """
     filter_best_bitscore.py -i ${full_blast_report} > ${sample_id}_${db_id}_blast_best_bitscore.csv
-    """
-}
-
-process build_report {
-
-    tag { sample_id }
-
-    executor 'local'
-
-    publishDir "${params.outdir}/", mode: 'copy', pattern: "${params.run_name}_report.html"
-
-    input:
-    path(collected_blast)
-
-    output:
-    path("${params.run_name}_report.html"), emit: report
-
-    script:
-    """
-    report2.py --blast ${collected_blast} --output ${params.run_name}_report.html
     """
 }
