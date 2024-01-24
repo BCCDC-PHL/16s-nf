@@ -6,6 +6,7 @@ include { seq_qc }               from './modules/blast.nf'
 include { blastn }               from './modules/blast.nf'
 include { filter_by_regex }      from './modules/blast.nf'
 include { filter_best_bitscore } from './modules/blast.nf'
+include { build_report }         from './modules/blast.nf'
 
 
 workflow {
@@ -29,13 +30,15 @@ workflow {
     ch_blast = blastn(ch_seqs.combine(ch_db)).blast_report
 
     if (params.filter_regexes != 'NO_FILE') {
-	ch_regexes = Channel.fromPath(params.filter_regexes)
-	ch_blast = filter_by_regex(ch_blast.combine(ch_regexes))
+      ch_regexes = Channel.fromPath(params.filter_regexes)
+      ch_blast = filter_by_regex(ch_blast.combine(ch_regexes))
     }
 
-    ch_blast.collectFile(it -> it[2], name: "collected_blast.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
+    ch_blast_collect = ch_blast.collectFile(it -> it[2], name: "${params.outdir}/collected_blast.csv", keepHeader: true, skip: 1)
 
     ch_blast_best_bitscore = filter_best_bitscore(ch_blast)
+
+    build_report(ch_blast_collect)
 
     ch_blast_best_bitscore.collectFile(it -> it[1], name: "collected_blast_best_bitscore.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
 }
