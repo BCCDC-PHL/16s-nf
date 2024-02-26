@@ -11,6 +11,7 @@ process seq_qc {
 
     output:
     tuple val(sample_id), path("${sample_id}_seq_qc.csv"), emit: seq_qc_csv
+    tuple val(sample_id), path("${sample_id}_qc_provenance.yml"),                emit: provenance
 
     script:
     sample_id = seq.id
@@ -19,6 +20,13 @@ process seq_qc {
     echo "${seq.seqString}" >> ${sample_id}.fa
 
     seq_qc.py -i ${sample_id}.fa > ${sample_id}_seq_qc.csv
+
+    cat <<-EOL_VERSIONS > ${sample_id}_qc_provenance.yml
+    - process_name: "${task.process}"
+      tools:
+      - tool_name: python
+        tool_version: \$(python3 --version | cut -d' ' -f2)
+    EOL_VERSIONS
     """
 }
 
@@ -37,6 +45,7 @@ process blastn {
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast.csv"),       emit: blast_report
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_seq_description"), emit: seq_description, optional:true
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_lineages.tsv"),    emit: lineage, optional:true
+    tuple val(sample_id), path("${sample_id}_${db_id}_blastn_provenance.yml"),                emit: provenance
     
     script:
     sample_id = seq.id
@@ -67,6 +76,26 @@ process blastn {
         mv ${sample_id}_${db_id}_blast.csv ${sample_id}_${db_id}_blast_tmp.csv
         add_db_metadata.py -m ${db_dir}/metadata.json -b ${sample_id}_${db_id}_blast_tmp.csv -d ${db_id} > ${sample_id}_${db_id}_blast.csv
     fi
+
+    cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_blastn_provenance.yml
+    - process_name: "${task.process}-${db_id}"
+      tools:
+      - tool_name: blastn
+        tool_version: \$(blastn -version | head -n1 | sed 's/blastn: //g')
+        parameters:
+        - parameter: "perc_identity"
+          value: ${params.minid}
+        - parameter: "qcov_hsp_perc"
+          value: ${params.mincov}
+          database used: ${db_name}
+          database_path: \$(readlink -f ${db_dir})
+          database sha256: \$(shasum -a 256 ${db_dir}/${db_name} | awk '{print \$1}')
+      - tool_name: taxonkit
+        tool_version: \$(taxonkit version | cut -d' ' -f2)
+      - tool_name: python
+        tool_version: \$(python3 --version | cut -d' ' -f2)
+    EOL_VERSIONS
+
     """
 }
 
@@ -80,14 +109,22 @@ process filter_by_regex {
     publishDir "${params.outdir}/${sample_id}", mode: 'copy', pattern: "${sample_id}_${db_id}_blast_filtered.csv"
 
     input:
-    tuple val(sample_id), val(db_id), path(full_blast_report), path(filter_regexes)
+    tuple val(sample_id), val(db_id), path(full_blast_report), path(filter_regexes)         
 
     output:
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast_filtered.csv"), emit: blast_filtered
+    tuple val(sample_id), path("${sample_id}_${db_id}_filter_regex_provenance.yml") ,               emit: provenance
 
     script:
     """
     filter_by_regex.py -i ${full_blast_report} -r ${filter_regexes} > ${sample_id}_${db_id}_blast_filtered.csv
+
+    cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_filter_regex_provenance.yml
+    - process_name: "${task.process}-${db_id}"
+      tools:
+      - tool_name: python
+        tool_version: \$(python3 --version | cut -d' ' -f2)
+    EOL_VERSIONS
     """
 }
 
@@ -105,29 +142,46 @@ process filter_best_bitscore {
 
     output:
     tuple val(sample_id), path("${sample_id}_${db_id}_blast_best_bitscore.csv"), emit: blast_best_bitscore_csv
+    tuple val(sample_id), path("${sample_id}_${db_id}_filter_bitscore_provenance.yml"),            emit: provenance
 
     script:
     """
     filter_best_bitscore.py -i ${full_blast_report} > ${sample_id}_${db_id}_blast_best_bitscore.csv
+
+    cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_filter_bitscore_provenance.yml
+    - process_name: "${task.process}-${db_id}"
+      tools:
+      - tool_name: python
+        tool_version: \$(python3 --version | cut -d' ' -f2)
+    EOL_VERSIONS
     """
 }
 
 process build_report {
 
-    tag { sample_id }
-
     executor 'local'
 
-    publishDir "${params.outdir}/", mode: 'copy', pattern: "${params.run_name}_report.html"
+    publishDir "${params.outdir}/", mode: 'copy', pattern: "*report.html"
 
     input:
     path(collected_blast)
+    path(database_csv)
 
     output:
-    path("${params.run_name}_report.html"), emit: report
+    path("summary_report.html"),        emit: report
+    path("report_provenance.yml"),      emit: provenance
 
     script:
     """
-    report2.py --blast ${collected_blast} --output ${params.run_name}_report.html
+    report2.py --blast ${collected_blast} --db ${database_csv} --output summary_report.html
+
+    cat <<-EOL_VERSIONS > report_provenance.yml
+    - process_name: "${task.process}"
+      tools:
+      - tool_name: python
+        tool_version: \$(python3 --version | cut -d' ' -f2)
+      - tool_name: pandas
+        tool_version: \$(conda list | grep pandas | sed -E 's/\s+/,/g' | cut -d',' -f2)
+    EOL_VERSIONS
     """
 }
