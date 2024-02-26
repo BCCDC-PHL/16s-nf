@@ -26,33 +26,15 @@ process pipeline_provenance {
 
   input:
   tuple val(pipeline_name), val(pipeline_version), val(analysis_start)
-  path(other_files)
+  path(other_provenance)
 
   output:
   path("pipeline_provenance.yml")
 
   script:
   """
-  cat ${other_files} > pipeline_provenance.yml
+  cat ${other_provenance} > pipeline_provenance.yml
   printf -- "- pipeline_name: ${pipeline_name}\\n  pipeline_version: ${pipeline_version}\\n- timestamp_analysis_start: ${analysis_start}\\n" >> pipeline_provenance.yml
 
-  """
-}
-process global_provenance {
-
-  tag { pipeline_name + " / " + pipeline_version }
-
-  executor 'local'
-
-  input:
-  path(pipline_provenance)
-  path(other_files)
-
-  output:
-  path("pipeline_provenance.yml")
-
-  script:
-  """
-  cat ${pipline_provenance} ${other_files} >> pipeline_provenance.yml
   """
 }

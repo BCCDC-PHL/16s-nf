@@ -25,7 +25,6 @@ include { filter_best_bitscore } from './modules/blast.nf'
 include { build_report }         from './modules/blast.nf'
 include { collect_provenance }         from './modules/provenance.nf'
 include { pipeline_provenance }         from './modules/provenance.nf'
-include { global_provenance }         from './modules/provenance.nf'
 
 
 workflow {
