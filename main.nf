@@ -17,14 +17,14 @@ println "Current date and time: $formattedDateTime"
 
 nextflow.enable.dsl = 2
 
-include { hash_seqs }               from './modules/hash_seqs.nf'
-include { seq_qc }               from './modules/blast.nf'
-include { blastn }               from './modules/blast.nf'
-include { filter_by_regex }      from './modules/blast.nf'
-include { filter_best_bitscore } from './modules/blast.nf'
-include { build_report }         from './modules/blast.nf'
-include { collect_provenance }         from './modules/provenance.nf'
-include { pipeline_provenance }         from './modules/provenance.nf'
+include { hash_seqs }                 from './modules/hash_seqs.nf'
+include { seq_qc }                    from './modules/blast.nf'
+include { blastn }                    from './modules/blast.nf'
+include { filter_by_regex }           from './modules/blast.nf'
+include { filter_best_bitscore }      from './modules/blast.nf'
+include { build_report }              from './modules/blast.nf'
+include { collect_provenance }        from './modules/provenance.nf'
+include { pipeline_provenance }       from './modules/provenance.nf'
 
 
 workflow {
@@ -61,7 +61,7 @@ workflow {
       ch_blast = filter_by_regex(ch_blast.combine(ch_regexes)).blast_filtered
     }
 
-    ch_blast_collect = ch_blast.collectFile(it -> it[2], name: "${params.outdir}/collected_blast.csv", keepHeader: true, skip: 1)
+    ch_blast.collectFile(it -> it[2], name: "collected_blast.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
 
     filter_best_bitscore(ch_blast)
 

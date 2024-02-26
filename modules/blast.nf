@@ -42,7 +42,7 @@ process blastn {
     tuple val(seq), val(db_id), val(db_name), path(db_dir)
 
     output:
-    tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast.csv"),       emit: blast_report
+    tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast.csv"),       emit: blast_report, optional:true
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_seq_description"), emit: seq_description, optional:true
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_lineages.tsv"),    emit: lineage, optional:true
     tuple val(sample_id), path("${sample_id}_${db_id}_blastn_provenance.yml"),                emit: provenance
