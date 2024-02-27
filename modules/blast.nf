@@ -87,16 +87,16 @@ process blastn {
           value: ${params.minid}
         - parameter: "qcov_hsp_perc"
           value: ${params.mincov}
-        databases:
-        - database_name: ${db_name}
-          database_version: ${db_version}
-          files: 
-          - filename: \$(readlink -f ${db_dir})/${db_name}
-            sha256: \$(shasum -a 256 ${db_dir}/${db_name} | awk '{print \$1}')
       - tool_name: taxonkit
         tool_version: \$(taxonkit version | cut -d' ' -f2)
       - tool_name: python
         tool_version: \$(python3 --version | cut -d' ' -f2)
+      databases:
+      - database_name: ${db_name}
+        database_version: ${db_version}
+        files: 
+        - filename: \$(readlink -f ${db_dir})/${db_name}
+          sha256: \$(shasum -a 256 ${db_dir}/${db_name} | awk '{print \$1}')
     EOL_VERSIONS
 
     """
