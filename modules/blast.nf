@@ -39,7 +39,7 @@ process blastn {
     publishDir "${params.outdir}/${sample_id}", mode: 'copy', pattern: "${sample_id}_${db_id}*"
 
     input:
-    tuple val(seq), val(db_id), val(db_name), path(db_dir)
+    tuple val(seq), val(db_id), val(db_name), val(db_version), path(db_dir)
 
     output:
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast.csv"),       emit: blast_report, optional:true
@@ -87,9 +87,12 @@ process blastn {
           value: ${params.minid}
         - parameter: "qcov_hsp_perc"
           value: ${params.mincov}
-          database_name: ${db_name}
-          database_path: \$(readlink -f ${db_dir})
-          database_sha256: \$(shasum -a 256 ${db_dir}/${db_name} | awk '{print \$1}')
+        databases:
+        - database_name: ${db_name}
+          database_version: ${db_version}
+          files: 
+          - filename: \$(readlink -f ${db_dir})/${db_name}
+            sha256: \$(shasum -a 256 ${db_dir}/${db_name} | awk '{print \$1}')
       - tool_name: taxonkit
         tool_version: \$(taxonkit version | cut -d' ' -f2)
       - tool_name: python
@@ -120,7 +123,7 @@ process filter_by_regex {
     filter_by_regex.py -i ${full_blast_report} -r ${filter_regexes} > ${sample_id}_${db_id}_blast_filtered.csv
 
     cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_filter_regex_provenance.yml
-    - process_name: "${task.process}-${db_id}"
+    - process_name: "${task.process}"
       tools:
       - tool_name: python
         tool_version: \$(python3 --version | cut -d' ' -f2)
@@ -152,7 +155,7 @@ process filter_best_bitscore {
     filter_best_bitscore.py -i ${full_blast_report} > ${sample_id}_${db_id}_blast_best_bitscore.csv
 
     cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_filter_bitscore_provenance.yml
-    - process_name: "${task.process}-${db_id}"
+    - process_name: "${task.process}"
       tools:
       - tool_name: python
         tool_version: \$(python3 --version | cut -d' ' -f2)
