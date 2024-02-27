@@ -80,7 +80,7 @@ workflow {
     ch_provenance = hash_seqs.out.provenance
     ch_provenance = ch_provenance.join(seq_qc.out.provenance).map{ it -> [it[0], [it[1]] << it[2]] }
     ch_provenance = ch_provenance.join(blastn.out.provenance.groupTuple()).map{ it -> [it[0], (it[1] + it[2]).flatten() ] } 
-    ch_provenance = ch_provenance.join(filter_best_bitscore.out.provenance.groupTuple()).map{ it -> [it[0], (it[1] + it[2]).flatten()] }
+    //ch_provenance = ch_provenance.join(filter_best_bitscore.out.provenance.groupTuple()).map{ it -> [it[0], (it[1] + it[2]).flatten()] }
     ch_provenance = ch_provenance.join(seq_qc.out.provenance.map{it -> it[0]}.combine(ch_pipeline_provenance)).map{ it -> [it[0], it[1] << it[2]] }
     collect_provenance(ch_provenance)
 }

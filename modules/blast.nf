@@ -95,8 +95,7 @@ process blastn {
       - database_name: ${db_name}
         database_version: ${db_version}
         files: 
-        - filename: \$(readlink -f ${db_dir})/${db_name}
-          sha256: \$(shasum -a 256 ${db_dir}/${db_name} | awk '{print \$1}')
+    \$(sha256sum \$(readlink -f ${db_dir})/${db_name}* | awk '{ printf("    - filename: \\"%s\\"\\n      sha256: \\"%s\\"\\n", \$2, \$1) }')
     EOL_VERSIONS
 
     """
@@ -116,21 +115,21 @@ process filter_by_regex {
 
     output:
     tuple val(sample_id), val(db_id), path("${sample_id}_${db_id}_blast_filtered.csv"), emit: blast_filtered
-    tuple val(sample_id), path("${sample_id}_${db_id}_filter_regex_provenance.yml") ,               emit: provenance
+    tuple val(sample_id), path("${sample_id}_${db_id}_filter_regex_provenance.yml") ,   emit: provenance, optional: true
 
     script:
     """
     filter_by_regex.py -i ${full_blast_report} -r ${filter_regexes} > ${sample_id}_${db_id}_blast_filtered.csv
 
-    cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_filter_regex_provenance.yml
-    - process_name: "${task.process}"
-      tools:
-      - tool_name: python
-        tool_version: \$(python3 --version | cut -d' ' -f2)
-        parameters:
-        - parameter: filter_regexes
-          value: ${filter_regexes}
-    EOL_VERSIONS
+    # cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_filter_regex_provenance.yml
+    # - process_name: "${task.process}"
+    #   tools:
+    #   - tool_name: python
+    #     tool_version: \$(python3 --version | cut -d' ' -f2)
+    #     parameters:
+    #     - parameter: filter_regexes
+    #       value: ${filter_regexes}
+    # EOL_VERSIONS
     """
 }
 
@@ -148,18 +147,18 @@ process filter_best_bitscore {
 
     output:
     tuple val(sample_id), path("${sample_id}_${db_id}_blast_best_bitscore.csv"), emit: blast_best_bitscore_csv
-    tuple val(sample_id), path("${sample_id}_${db_id}_filter_bitscore_provenance.yml"),            emit: provenance
+    tuple val(sample_id), path("${sample_id}_${db_id}_filter_bitscore_provenance.yml"),    emit: provenance, optional: true
 
     script:
     """
     filter_best_bitscore.py -i ${full_blast_report} > ${sample_id}_${db_id}_blast_best_bitscore.csv
 
-    cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_filter_bitscore_provenance.yml
-    - process_name: "${task.process}"
-      tools:
-      - tool_name: python
-        tool_version: \$(python3 --version | cut -d' ' -f2)
-    EOL_VERSIONS
+    # cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_filter_bitscore_provenance.yml
+    # - process_name: "${task.process}"
+    #   tools:
+    #   - tool_name: python
+    #     tool_version: \$(python3 --version | cut -d' ' -f2)
+    # EOL_VERSIONS
     """
 }
 
