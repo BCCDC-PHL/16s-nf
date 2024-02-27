@@ -29,9 +29,13 @@ include { pipeline_provenance }       from './modules/provenance.nf'
 
 workflow {
 
-  ch_start_time = Channel.of(now)
-  ch_pipeline_name = Channel.of(workflow.manifest.name)
-  ch_pipeline_version = Channel.of(workflow.manifest.version)
+  ch_pipeline_metadata = Channel.value([
+    workflow.sessionId,
+    workflow.runName,
+    workflow.manifest.name,
+    workflow.manifest.version,
+    workflow.start,
+  ])
 
   if (params.samplesheet_input != 'NO_FILE') {
     ch_fasta = Channel.fromPath(params.samplesheet_input).splitCsv(header: true).map{ it -> [it['ID'], it['FILE']] }
@@ -70,7 +74,7 @@ workflow {
     filter_best_bitscore.out.blast_best_bitscore_csv.collectFile(it -> it[1], name: "collected_blast_best_bitscore.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
 
     // Build pipeline provenance 
-    ch_pipeline_provenance = pipeline_provenance(ch_pipeline_name.combine(ch_pipeline_version).combine(ch_start_time), build_report.out.provenance)
+    ch_pipeline_provenance = pipeline_provenance(ch_pipeline_metadata, build_report.out.provenance)
     
     //Pool Provenance data
     ch_provenance = hash_seqs.out.provenance

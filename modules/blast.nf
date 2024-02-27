@@ -78,7 +78,7 @@ process blastn {
     fi
 
     cat <<-EOL_VERSIONS > ${sample_id}_${db_id}_blastn_provenance.yml
-    - process_name: "${task.process}-${db_id}"
+    - process_name: "${task.process}"
       tools:
       - tool_name: blastn
         tool_version: \$(blastn -version | head -n1 | sed 's/blastn: //g')
@@ -87,9 +87,9 @@ process blastn {
           value: ${params.minid}
         - parameter: "qcov_hsp_perc"
           value: ${params.mincov}
-          database used: ${db_name}
+          database_name: ${db_name}
           database_path: \$(readlink -f ${db_dir})
-          database sha256: \$(shasum -a 256 ${db_dir}/${db_name} | awk '{print \$1}')
+          database_sha256: \$(shasum -a 256 ${db_dir}/${db_name} | awk '{print \$1}')
       - tool_name: taxonkit
         tool_version: \$(taxonkit version | cut -d' ' -f2)
       - tool_name: python
@@ -124,6 +124,9 @@ process filter_by_regex {
       tools:
       - tool_name: python
         tool_version: \$(python3 --version | cut -d' ' -f2)
+        parameters:
+        - parameter: filter_regexes
+          value: ${filter_regexes}
     EOL_VERSIONS
     """
 }
@@ -180,8 +183,6 @@ process build_report {
       tools:
       - tool_name: python
         tool_version: \$(python3 --version | cut -d' ' -f2)
-      - tool_name: pandas
-        tool_version: \$(conda list | grep pandas | sed -E 's/\s+/,/g' | cut -d',' -f2)
     EOL_VERSIONS
     """
 }
