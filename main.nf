@@ -65,13 +65,13 @@ workflow {
       ch_blast = filter_by_regex(ch_blast.combine(ch_regexes)).blast_filtered
     }
 
-    ch_blast.collectFile(it -> it[2], name: "collected_blast.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
+    ch_blast_collect = ch_blast.collectFile(it -> it[2], name: "collected_blast.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
 
     filter_best_bitscore(ch_blast)
+    
+    filter_best_bitscore.out.blast_best_bitscore_csv.collectFile(it -> it[1], name: "collected_blast_best_bitscore.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
 
     build_report(ch_blast_collect, Channel.fromPath(params.databases))
-
-    filter_best_bitscore.out.blast_best_bitscore_csv.collectFile(it -> it[1], name: "collected_blast_best_bitscore.csv", storeDir: params.outdir, keepHeader: true, skip: 1)
 
     // Build pipeline provenance 
     ch_pipeline_provenance = pipeline_provenance(ch_pipeline_metadata, build_report.out.provenance)
