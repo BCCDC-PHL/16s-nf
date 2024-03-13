@@ -1,0 +1,70 @@
+LOCUS       NR_024570               1450 bp    rRNA    linear   BCT 11-MAR-2019
+DEFINITION  Escherichia coli strain U 5/41 16S ribosomal RNA, partial sequence.
+ACCESSION   NR_024570
+VERSION     NR_024570.1
+DBLINK      Project: 33175
+            BioProject: PRJNA33175
+KEYWORDS    RefSeq.
+SOURCE      Escherichia coli
+  ORGANISM  Escherichia coli
+            Bacteria; Pseudomonadota; Gammaproteobacteria; Enterobacterales;
+            Enterobacteriaceae; Escherichia.
+REFERENCE   1
+  AUTHORS   Cilia,V., Lafay,B. and Christen,R.
+  TITLE     Sequence heterogeneities among 16S ribosomal RNA sequences, and
+            their effect on phylogenetic analyses at the species level
+  JOURNAL   Mol. Biol. Evol. 13 (3), 451-461 (1996)
+   PUBMED   8742634
+REFERENCE   2  (bases 1 to 1450)
+  CONSRTM   NCBI RefSeq Targeted Loci Project
+  TITLE     Direct Submission
+  JOURNAL   Submitted (31-DEC-2008) National Center for Biotechnology
+            Information, NIH, Bethesda, MD 20894, USA
+REFERENCE   3  (bases 1 to 1450)
+  AUTHORS   Lafay,B.
+  TITLE     Direct Submission
+  JOURNAL   Submitted (26-JUL-1994) B. Lafay, CNRS & Universite Paris 6,
+            Station Zoologique, Observatoire Oceanologique, Villefranche Sur
+            Mer, 06230, FRANCE
+COMMENT     REVIEWED REFSEQ: This record has been curated by NCBI staff. The
+            reference sequence was derived from X80725.
+FEATURES             Location/Qualifiers
+     source          1..1450
+                     /organism="Escherichia coli"
+                     /mol_type="rRNA"
+                     /strain="U 5/41; ATCC 11775"
+                     /serovar="01:Kl:H7"
+                     /isolation_source="urine from cystitis patient"
+                     /culture_collection="ATCC:11775"
+                     /type_material="neotype strain of Escherichia coli"
+                     /db_xref="taxon:562"
+     rRNA            <1..>1450
+                     /product="16S ribosomal RNA"
+ORIGIN      
+        1 agtttgatca tggctcagat tgaacgctgg cggcaggcct aacacatgca agtcgaacgg
+       61 taacaggaag cagcttgctg ctttgctgac gagtggcgga cgggtgagta atgtctggga
+      121 aactgcctga tggaggggga taactactgg aaacggtagc taataccgca taacgtcgca
+      181 agcacaaaga gggggacctt agggcctctt gccatcggat gtgcccagat gggattagct
+      241 agtaggtggg gtaacggctc acctaggcga cgatccctag ctggtctgag aggatgacca
+      301 gcaacactgg aactgagaca cggtccagac tcctacggga ggcagcagtg gggaatattg
+      361 cacaatgggc gcaagcctga tgcagccatg cngcgtgtat gaagaaggcc ttcgggttgt
+      421 aaagtacttt cagcggggag gaagggagta aagttaatac ctttgctcat tgacgttacc
+      481 cgcagaagaa gcaccggcta actccgtgcc agcagccgcg gtaatacgga gggtgcaagc
+      541 gttaatcgga attactgggc gtaaagcgca cgcaggcggt ttgttaagtc agatgtgaaa
+      601 tccccgggct caacctggga actgcatctg atactggcaa gcttgagtct cgtagagggg
+      661 ggtagaattc caggtgtagc ggtgaaatgc gtagagatct ggaggaatac cggtggcgaa
+      721 ggcggccccc tggacgaaga ctgacgctca ggtgcgaaag cgtggggagc aaacaggatt
+      781 agataccctg gtagtccacg ccgtaaacga tgtcgacttg gaggttgtgc ccttgaggcg
+      841 tggcttccgg anntaacgcg ttaagtcgac cgcctgggga gtacggccgc aaggttaaaa
+      901 ctcaaatgaa ttgacggggg ccgcacaagc ggtggagcat gtggtttaat tcgatgcaac
+      961 gcgaagaacc ttacctggtc ttgacatcca cggaagtttt cagagatgag aatgtgcctt
+     1021 cgggaaccgt gagacaggtg ctgcatggct gtcgtcagct cgtgttgtga aatgttgggt
+     1081 taagtcccgc aacgagcgca acccttatcc tttgttgcca gcggtccggc cgggaactca
+     1141 aaggagactg ccagtgataa actggaggaa ggtggggatg acgtcaagtc atcatggccc
+     1201 ttacgaccag ggctacacac gtgctacaat ggcgcataca aagagaagcg acctcgcgag
+     1261 agcaagcgga cctcataaag tgcgtcgtag tccggattgg agtctgcaac tcgactccat
+     1321 gaagtcggaa tcgctagtaa tcgtggatca gaatgccacg gtgaatacgt tcccgggcct
+     1381 tgtacacacc gcccgtcaca ccatgggagt gggttgcaaa agaagtaggt agcttaactt
+     1441 cgggagggcg
+//
+
