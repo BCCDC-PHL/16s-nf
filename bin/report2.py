@@ -64,7 +64,8 @@ def parse_blast(filepath):
 	df = pd.read_csv(filepath)
 
 	#df['database'] = os.path.basename(filepath).split('_')[1]
-	df["species"] = df["species"].apply(lambda x: "" if x == "a" else x)
+
+	df["species"] = df["species"].apply(lambda x: "" if x == "a" else x).astype(str)
 	df = df.sort_values(['query_seq_id', 'bitscore'], ascending=[True, False])
 
 	df['percent_identity'] = df['percent_identity'].round(3)
