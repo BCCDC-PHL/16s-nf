@@ -32,8 +32,6 @@ process seq_qc {
 
 process blastn {
 
-    errorStrategy 'ignore'
-
     tag { sample_id + ' / ' + db_id }
 
     publishDir "${params.outdir}/${sample_id}", mode: 'copy', pattern: "${sample_id}_${db_id}*"
@@ -54,6 +52,7 @@ process blastn {
     echo "${seq.seqString}" >> ${sample_id}.fa
 
     export BLASTDB="${db_dir}"
+    export TAXONKIT_DB="${params.taxonkit_db}"
 
     echo "query_seq_id,subject_accession,subject_strand,query_length,query_start,query_end,subject_length,subject_start,subject_end,alignment_length,percent_identity,percent_coverage,num_mismatch,num_gaps,e_value,bitscore,subject_taxids,subject_names" > ${sample_id}_${db_id}_blast.csv
 
