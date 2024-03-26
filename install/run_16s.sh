@@ -8,7 +8,7 @@ fi
 
 INPUT=$1
 OUTPUT=$2
-RELEASE="dev"
+RELEASE="v1.0.2"
 
 if [ ! -d "$INPUT" ]; then 
     echo "ERROR: The input directory you specified does not exist. Check your path carefully."
