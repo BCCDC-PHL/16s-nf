@@ -1,4 +1,1 @@
-*~
-.nextflow*
-test_*
-work
+bin/__pycache__/
