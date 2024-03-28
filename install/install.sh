@@ -1,7 +1,7 @@
 #!/bin/bash
 set -e
 
-CONDA_HASH="ae4b4e564895af1445a0ff58c7f30884"
+PIPELINE_RELEASE="v1.0.2"
 
 cd ~/
 
@@ -9,6 +9,7 @@ cd ~/
 mkdir -p ~/.nextflow/ 
 mkdir -p ~/.conda/envs/
 mkdir -p ~/work/16s/results/
+mkdir -p ~/work/16s/db/ 
 
 # make nextflow config file to link nextflow to Slurm executor
 if [ ! -f ~/.nextflow/config ] ; then 
@@ -39,13 +40,19 @@ source ~/.bashrc
 # pull the nextflow pipeline 
 if [ ! -d ~/.nextflow/assets/BCCDC-PHL/16s-nf ]; then
 	echo " ------ Downloading 16S pipeline... ------ " && 
-	nextflow pull BCCDC-PHL/16s-nf
+	nextflow pull -r ${PIPELINE_RELEASE} BCCDC-PHL/16s-nf
 else
 	echo " ------ 16S pipeline already downloaded. Skipping step... ------ "
 fi	
 
+if [ ! -f ~/.nextflow/assets/BCCDC-PHL/16s-nf/install/run_16s.sh ]; then
+	echo "ERROR: Could not find the routine analysis script (run_16s.sh) in the 16S pipeline repo."
+	exit 1
+fi
 
-mkdir -p ~/work/16s/db/
+cp ~/.nextflow/assets/BCCDC-PHL/16s-nf/install/run_16s.sh ~/ &&
+cp ~/.nextflow/assets/BCCDC-PHL/16s-nf/install/run_16s_flex.sh ~/ &&
+echo " ------ Successfully copied pipeline run script to ~/run_16s.sh ------ "
 
 if [ ! -f ~/work/16s/db/databases.csv ]; then 
 	echo " ------ Creating databases.csv file ... ------ " &&
