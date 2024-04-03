@@ -50,8 +50,11 @@ if [ ! -f ~/.nextflow/assets/BCCDC-PHL/16s-nf/install/run_16s.sh ]; then
 	exit 1
 fi
 
+echo " ------ Copying run scripts to home directory ------ " &&
 cp ~/.nextflow/assets/BCCDC-PHL/16s-nf/install/run_16s.sh ~/ &&
 cp ~/.nextflow/assets/BCCDC-PHL/16s-nf/install/run_16s_flex.sh ~/ &&
+
+
 echo " ------ Successfully copied pipeline run script to ~/run_16s.sh ------ "
 
 if [ ! -f ~/work/16s/db/databases.csv ]; then 
