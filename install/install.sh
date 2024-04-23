@@ -55,7 +55,13 @@ source ~/.bashrc
 
 # pull the nextflow pipeline 
 echo " ------ Downloading 16S pipeline... ------ " && 
-nextflow pull -r ${PIPELINE_VERSION} BCCDC-PHL/16s-nf
+nextflow pull -r ${PIPELINE_VERSION} BCCDC-PHL/16s-nf 2> ~/err.txt 
+
+if [[ `grep "cannot pull" err.txt` ]]; then
+	echo "ERROR: Failed to pull the Nextflow pipeline. Error saved in ~/err.txt."
+	cat ~/err.txt
+	exit 1
+fi
 
 # double check that the run_16s.sh script is available
 if [ ! -f ~/.nextflow/assets/BCCDC-PHL/16s-nf/install/run_16s.sh ]; then
