@@ -172,12 +172,12 @@ process build_report {
     path(database_csv)
 
     output:
-    path("summary_report.html"),        emit: report
+    path("*_report.html"),        emit: report
     path("report_provenance.yml"),      emit: provenance
 
     script:
     """
-    report2.py --blast ${collected_blast} --db ${database_csv} --output summary_report.html
+    report2.py --blast ${collected_blast} --db ${database_csv} --output ${params.run_name}_report.html
 
     cat <<-EOL_VERSIONS > report_provenance.yml
     - process_name: "${task.process}"
