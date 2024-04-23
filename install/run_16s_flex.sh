@@ -24,6 +24,7 @@ fi
 nextflow run BCCDC-PHL/16s-nf -r $RELEASE -profile conda \
 --fasta_input $INPUT \
 --outdir $OUTPUT \
+--run_name $(basename $INPUT) \
 --databases ~/work/16s/db/databases.csv \
 --taxonkit_db /data/ref_databases/taxonkit/latest \
 --cache /scratch/conda_envs/16s/
