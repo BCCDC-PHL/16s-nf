@@ -2,26 +2,30 @@
 
 Prepare a report for taxonomic assignment based on [16S rRNA](https://en.wikipedia.org/wiki/16S_ribosomal_RNA) sequences, using [BLAST](https://blast.ncbi.nlm.nih.gov/Blast.cgi).
 
-## Usage
+## Setup
+
+### BLASTN Databases 
 
 The pipeline requires a list of BLAST databases to run against. It should follow the following format:
 
 ```csv
-ID,DBNAME,PATH
-ncbi,16S_ribosomal_RNA,/path/to/ncbi/2023-09-19_1.1_16S_ribosomal_RNA
-silva,SSURef_NR99_tax_silva_trunc,/path/to/silva/2020-08-24_138.1_SSURef_NR99_tax_silva_trunc
+ID,DBNAME,DBVERSION,PATH
+ncbi,16s-ncbi,1.0,/path/to/blastn/database/2023-12-12_1.0_16s-ncbi
+db2,database2,1.0,/path/to/blastn/database/2023-12-20_1.0_16s-db2
+db3,database3,1.0,/path/to/blastn/database/2024-01-15_1.0_16s-db3
 ```
 
 ...where we expect to find the actual database files at:
 
 ```
-/path/to/ncbi/2023-09-19_1.1_16S_ribosomal_RNA/16S_ribosomal_RNA.ndb
-/path/to/ncbi/2023-09-19_1.1_16S_ribosomal_RNA/16S_ribosomal_RNA.nhr
-/path/to/ncbi/2023-09-19_1.1_16S_ribosomal_RNA/16S_ribosomal_RNA.nin
+/path/to/blastn/database/2023-12-12_1.0_16s-ncbi/16s-ncbi.ndb
+/path/to/blastn/database/2023-12-12_1.0_16s-ncbi/16s-ncbi.nhr
+/path/to/blastn/database/2023-12-12_1.0_16s-ncbi/16s-ncbi.nin
 ...etc
-/path/to/silva/2020-08-24_138.1_SSURef_NR99_tax_silva_trunc/SSURef_NR99_tax_silva_trunc.ndb
-/path/to/silva/2020-08-24_138.1_SSURef_NR99_tax_silva_trunc/SSURef_NR99_tax_silva_trunc.nhr
-/path/to/silva/2020-08-24_138.1_SSURef_NR99_tax_silva_trunc/SSURef_NR99_tax_silva_trunc.nin
+
+/path/to/blastn/database/2023-12-20_1.0_16s-db2/database2.ndb
+/path/to/blastn/database/2023-12-20_1.0_16s-db2/database2.nhr
+/path/to/blastn/database/2023-12-20_1.0_16s-db2/database2.nin
 ...etc
 ```
 
@@ -35,7 +39,7 @@ The pipeline also assumes that there is a `metadata.json` file alongside the dat
 The contents of the metadata file may vary by database, but we assume that:
 
 - The file contains a single top-level object (not an array or atomic value).
-- The top-level object includes these fields:
+- The top-level object should at minimum, include these fields:
 
 ```
 version
@@ -44,12 +48,31 @@ date
 
 The values associated with those fields will be incorporated into the blast results. All other fields in
 the `metadata.json` file are ignored.
+An example `metadata.json` is as follows:
+```
+{
+  "dbname": "16s-ncbi",
+  "version": "1.0",
+  "date": "2024-01-16",
+  "number-of-sequences": 27056,
+}
+```
+
+### Taxonkit
+It is also required to provide a path to a local copy of the `taxonkit` database.
+Download and installation instructions can be found [here](https://bioinf.shenwei.me/taxonkit/#dataset)
+
+
+## Running The Pipeline
+
+The following command will run the pipeline using Nextflow:
 
 ```
 nextflow run BCCDC-PHL/16s-nf \
   --databases </path/to/blast/databases.csv> \
   --fasta_input </path/to/fasta_dir> \
   --outdir </path/to/output_dir>
+  --taxonkit_db </path/to/taxonkit/database>
 ```
 
 By default, minimum identity and coverage thresholds of 95% will be applied to the blast results.
@@ -62,6 +85,7 @@ nextflow run BCCDC-PHL/16s-nf \
   --minid 99.0 \
   --mincov 97.5 \
   --outdir </path/to/output_dir>
+  --taxonkit_db </path/to/taxonkit/database>
 ```
 
 Collecting database metadata from the `metadata.json` file can be skipped using the `--no_db_metadata` flag.
